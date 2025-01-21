@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pothole Detection System</title>
+    <link rel="stylesheet" href="shcss.css">
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Pothole Detection System</h1>
+        
+        <!-- Input Options -->
+        <div class="input-options">
+            <form id="upload-form" enctype="multipart/form-data">
+                <input type="file" id="file-input" name="file" accept=".jpg, .jpeg, .png, .mp4">
+                <br><br><button type="submit">Upload and Predict</button>
+            </form>
+            <form action="web.html">
+            <button id="live-feed-btn">Live Feed</button></form>
+        </div>
+       
+
+        <!-- Output Section -->
+        <div id="output-section" class="output-section">
+            <h2>Output Detection</h2>
+            <img id="file-input" alt="" width="500" height="600">
+            <img id="output-image" src="E:/Roadify/data/final_result/output_image.jpg" alt="Detection output" width="500" height="600">
+        
+            <video id="output-video" controls style="display: none;">
+                <source src="E:/Roadify/data/final_result/output_video.mp4" type="video/mp4">
+                Your browser does not support the video tag.</video>
+        </div>
+    </div>
+
+    <style>
+        video, canvas {
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid black;
+            margin-bottom: 10px;
+            margin-left: 32%;
+            
+        
+        }
+        body {
+    font-family: "Gill Sans", sans-serif;;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
+    background: rgb(2,0,36);
+background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,187,82,1) 0%, rgba(0,212,255,1) 100%);
+}
+
+.container {
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2em;
+    color: linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%);
+    margin-bottom: 20px;
+
+}
+button{
+    padding: 10px 20px;
+    background: rgb(99, 93, 216);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            max-width: 150px;
+            margin-top: 10px;
+            font-family: "Gill Sans", sans-serif;;
+}
+
+button:hover{
+    background-color: #ffffff;
+    color: #000000;
+}
+input{
+    align-items: center;
+    position: absolute;
+    left: 44%;
+    font-family: "Gill Sans", sans-serif;;
+}
+#live-feed-btn{
+    padding: 10px 20px;
+    background: rgb(99, 93, 216);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            max-width: 150px;
+            margin-top: 10px;
+            font-family: "Gill Sans", sans-serif;;
+}
+#live-feed-btn:hover {
+    background-color: #ffffff;
+    color: #333;
+}
+.option-button {
+    background: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    margin: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.option-button:hover {
+    background: #0056b3;
+}
+
+.upload-section {
+    margin-top: 20px;
+}
+
+.action-button {
+    background: #28a745;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    margin: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.action-button:hover {
+    background: #218838;
+}
+
+.output-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.output-image {
+    display: inline-block;
+    margin: 10px;
+    text-align: center;
+    position: relative;
+}
+
+.output-image img {
+    max-width: 200px;
+    border: 2px solid #333;
+    border-radius: 5px;
+}
+
+.label-box {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.coordinates {
+    font-size: 0.9em;
+    color: #666;
+}
+
+    </style>
+    <script>
+   document.getElementById('upload-form').onsubmit = async function (event) {
+            event.preventDefault();
+
+            const fileInput = document.getElementById('file-input');
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.status === "success") {
+                if (result.output_image) {
+                    document.getElementById('output-image').src = result.output_image;
+                    document.getElementById('output-image').style.display = "block";
+                    document.getElementById('output-video').style.display = "none";
+                } else if (result.output_video) {
+                    document.getElementById('output-video').src = result.output_video;
+                    document.getElementById('output-video').style.display = "block";
+                    document.getElementById('output-image').style.display = "none";
+                }
+            } else {
+                alert(result.message);
+            }
+        };
+       
+    </script>
+</body>
+</html>

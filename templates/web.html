@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webcam Photo & Video Capture with Audio</title>
+    <style>
+        video, canvas {
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid black;
+            margin-bottom: 10px;
+            margin-left: 32%;
+            
+        
+        }
+    </style>
+</head>
+<body>
+    <h2>Live Feed</h2>
+    
+    <video id="webcam" autoplay playsinline></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <br>
+    <div class="flex-parent jc-center">
+    <button id="startWebcam">Start Webcam</button>
+    <button id="takePhoto">Take Photo</button>
+    <button id="startRecording">Start Recording</button>
+    <button id="stopRecording" disabled>Stop Recording</button>
+    </div>
+    <h3>Captured Photo:</h3>
+
+    <div class="content">
+        
+        <img id="capturedPhoto" alt="Your photo will appear here">
+    </div>
+    <h4>Recorded Video with Audio:</h4>
+
+    <div class="text_c">
+        
+        <video id="recordedVideo" controls></video>
+    </div>
+
+    <style>
+        *{
+            background-color:palegoldenrod;
+  
+        }
+        h2{
+          margin-left: 46%;
+          font-family: "Gill Sans", sans-serif;;
+        }
+        h3{
+          margin-left: 45%;
+          font-family: "Gill Sans", sans-serif;;
+        }
+        h4{
+          margin-left: 41%;
+          font-size: larger;
+          font-family: "Gill Sans", sans-serif;;
+        }
+      
+        .flex-parent {
+            display: flex;
+            
+                        }
+            .jc-center {
+            justify-content: center;
+            
+            
+            
+            }
+        button.margin-right {
+        margin-right: 20px;
+        }
+        .content {
+            justify-content: center;
+            margin-left: -20%;
+            
+            }
+      
+            img{
+                margin-left: 43%;
+            }
+
+
+
+
+
+
+    </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script>
+        const webcam = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+        const startWebcamBtn = document.getElementById('startWebcam');
+        const takePhotoBtn = document.getElementById('takePhoto');
+        const startRecordingBtn = document.getElementById('startRecording');
+        const stopRecordingBtn = document.getElementById('stopRecording');
+        const capturedPhoto = document.getElementById('capturedPhoto');
+        const recordedVideo = document.getElementById('recordedVideo');
+
+        let mediaStream = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+
+        // Start the webcam with video and audio
+        startWebcamBtn.addEventListener('click', async () => {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                webcam.srcObject = mediaStream;
+            } catch (err) {
+                console.error("Error accessing webcam and microphone: ", err);
+            }
+        });
+
+        // Take a photo
+        takePhotoBtn.addEventListener('click', () => {
+            if (mediaStream) {
+                const context = canvas.getContext('2d');
+                canvas.width = webcam.videoWidth;
+                canvas.height = webcam.videoHeight;
+                context.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+                
+                // Save photo as data URL and display it
+                const dataUrl = canvas.toDataURL('image/png');
+                capturedPhoto.src = dataUrl;
+            }
+        });
+
+        // Start recording video with audio
+        startRecordingBtn.addEventListener('click', () => {
+            if (mediaStream) {
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm;codecs=vp8,opus' });
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    recordedVideo.src = URL.createObjectURL(blob);
+                    recordedVideo.controls = true;
+                };
+
+                mediaRecorder.start();
+                startRecordingBtn.disabled = true;
+                stopRecordingBtn.disabled = false;
+            }
+        });
+
+        // Stop recording video
+        stopRecordingBtn.addEventListener('click', () => {
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+                startRecordingBtn.disabled = false;
+                stopRecordingBtn.disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>
